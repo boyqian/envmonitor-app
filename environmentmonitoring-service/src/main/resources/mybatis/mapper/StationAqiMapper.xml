@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.StationAqiMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.StationAqi">
+        <id column="station_aqi_id" property="stationAqiId"/>
+        <result column="station_name" property="stationName"/>
+        <result column="station_code" property="stationCode"/>
+        <result column="county_name" property="countyName"/>
+        <result column="city_name" property="cityName"/>
+        <result column="city_code" property="cityCode"/>
+        <result column="station_longitude" property="stationLongitude"/>
+        <result column="station_latitude" property="stationLatitude"/>
+        <result column="publish_date_time" property="publishDateTime"/>
+        <result column="station_aqi_type" property="stationAqiType"/>
+        <result column="aqi" property="aqi"/>
+        <result column="aqi_level" property="aqiLevel"/>
+        <result column="primary_pollutant" property="primaryPollutant"/>
+        <result column="pm2_5" property="pm25"/>
+        <result column="pm10" property="pm10"/>
+        <result column="so2" property="so2"/>
+        <result column="no2" property="no2"/>
+        <result column="co" property="co"/>
+        <result column="o3" property="o3"/>
+        <result column="iaqi_pm2_5" property="iaqiPm25"/>
+        <result column="iaqi_pm10" property="iaqiPm10"/>
+        <result column="iaqi_so2" property="iaqiSo2"/>
+        <result column="iaqi_no2" property="iaqiNo2"/>
+        <result column="iaqi_co" property="iaqiCo"/>
+        <result column="iaqi_o3" property="iaqiO3"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="editor" property="editor"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="standby1" property="standby1"/>
+        <result column="standby2" property="standby2"/>
+        <result column="standby3" property="standby3"/>
+        <result column="standby4" property="standby4"/>
+        <result column="standby5" property="standby5"/>
+    </resultMap>
+
+
+    <!-- 批量新增StationAqi -->
+    <insert id="insertStationAqiBatch" parameterType="java.util.List">
+        INSERT INTO t_station_aqi (
+        station_aqi_id,
+        station_name,
+        station_code,
+        station_type,
+        county_name,
+        city_name,
+        city_code,
+        station_longitude,
+        station_latitude,
+        publish_date_time,
+        station_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        create_time)
+        VALUES
+        <foreach collection="stationAqiList" item="stationAqi" index="index" separator=",">
+            (#{stationAqi.stationAqiId},
+            #{stationAqi.stationName},
+            #{stationAqi.stationCode},
+            #{stationAqi.stationType},
+            #{stationAqi.countyName},
+            #{stationAqi.cityName},
+            #{stationAqi.cityCode},
+            #{stationAqi.stationLongitude},
+            #{stationAqi.stationLatitude},
+            #{stationAqi.publishDateTime},
+            #{stationAqi.stationAqiType},
+            #{stationAqi.aqi},
+            #{stationAqi.aqiLevel},
+            #{stationAqi.primaryPollutant},
+            #{stationAqi.pm25},
+            #{stationAqi.pm10},
+            #{stationAqi.so2},
+            #{stationAqi.no2},
+            #{stationAqi.co},
+            #{stationAqi.o3},
+            #{stationAqi.createTime})
+        </foreach>
+    </insert>
+
+    <!-- 查找StationAqi -->
+    <select id="getStationAqi" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultMap="BaseResultMap">
+        SELECT
+        station_aqi_id,
+        station_name,
+        station_code,
+        station_type,
+        county_name,
+        city_name,
+        city_code,
+        station_longitude,
+        station_latitude,
+        publish_date_time,
+        station_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_station_aqi
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="stationAqiId != null and stationAqiId != ''">
+                    station_aqi_id = #{stationAqiId}
+                </if>
+            </trim>
+        </where>
+    </select>
+
+
+    <!-- 查找四川省监测站点AQI数据最后更新时间 -->
+    <select id="getLatestTimeForStationAqi" parameterType="java.lang.String" resultType="java.time.LocalDateTime">
+        SELECT publish_date_time
+        FROM t_station_aqi
+        <where>
+            left(city_code, 2) = '51' AND station_aqi_type = #{stationAqiType}
+        </where>
+        ORDER BY publish_date_time DESC
+        LIMIT 0, 1
+    </select>
+    <!-- 物理删除StationAqi -->
+    <!--
+    <delete id="deleteStationAqi" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi">
+        DELETE FROM t_station_aqi
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="stationAqiId != null and stationAqiId != ''">
+                    station_aqi_id = #{stationAqiId}
+                </if>
+            </trim>
+        </where>
+    </delete>
+    -->
+    
+    <!-- 获取监测地图中站点的分布情况,默认展示近一条数据的情况 -->
+    <select id="getStationAqiByOperation" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultMap="BaseResultMap">
+    <if test='standby1=="D"'>
+    SELECT
+        station_aqi_id,
+        station_name,
+        station_code,
+        station_type,
+        county_name,
+        city_name,
+        city_code,
+        station_longitude,
+        station_latitude,
+        publish_date_time,
+        station_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_station_aqi
+        WHERE 1=1
+        AND publish_date_time>=DATE_SUB(NOW(), INTERVAL 24 HOUR) 
+        <if test="cityCode!=null and cityCode!=''">
+        AND city_code=#{cityCode}
+        </if>
+    </if>
+    <if test='standby1==null or standby1=="" or standby1=="H"'>
+    select a.*,b.* from
+	(select DISTINCT(station_name),station_longitude,station_latitude from t_station_aqi
+	 where 1=1
+	<if test="cityCode!=null and cityCode!=''">
+        AND city_code=#{cityCode}
+     </if>
+	)as
+	a
+	left join 
+	(
+	SELECT
+        station_aqi_id,
+        station_name,
+        station_code,
+        station_type,
+        county_name,
+        city_name,
+        city_code,
+        publish_date_time,
+        station_aqi_type,
+		station_longitude,
+		station_latitude,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_station_aqi
+        WHERE 1=1
+       	<if test="standby2!=null and standby2!=''">
+       	AND DATE_FORMAT(publish_date_time,'%Y%m%d%H')=DATE_FORMAT(#{standby2},'%Y%m%d%H') 
+       	</if>
+ 		<if test="cityCode!=null and cityCode!=''">
+        AND city_code=#{cityCode}
+        </if>
+		)as 
+		b
+		on a.station_name=b.station_name
+     </if>
+    </select>
+    
+    <!-- 监测地图查询单个站点不同因子不同时间段等折线图 -->
+    <select id="getSingleStationAqiThrend" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultMap="BaseResultMap">
+    SELECT
+        station_aqi_id,
+        station_name,
+        station_code,
+        station_type,
+        county_name,
+        city_name,
+        city_code,
+        station_longitude,
+        station_latitude,
+        publish_date_time,
+        station_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_station_aqi
+        WHERE 1=1
+        <if test="stationCode!=null and stationCode!=''">
+        and station_code=#{stationCode}
+        </if>
+        <if test="standby2!=null and standby2!=''">
+        and publish_date_time <![CDATA[ >= ]]> #{standby2}
+        </if>
+        <if test="standby3!=null and standby3!=''">
+        and publish_date_time <![CDATA[ <= ]]> #{standby3}
+        </if>
+        <if test="stationType!=null and stationType!=''">
+        and station_type=#{stationType}
+        </if>
+        <if test="cityCode!=null and cityCode!=''">
+        and city_code=#{cityCode}
+        </if>
+        order by publish_date_time asc
+    </select>
+    
+    <!-- 统计分析-统计报表数据 -->
+    <select id="getStationReport" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultType="com.upsoft.environmentmonitoring.domain.vo.StationReportVO">
+    SELECT
+        station_name as stationName,
+        ROUND(AVG(aqi)) as aqi,
+        ROUND(AVG(pm2_5)) as pm25,
+        ROUND(AVG(pm10)) as pm10,
+        ROUND(AVG(so2)) as so2,
+        ROUND(AVG(no2)) as no2,
+        ROUND(AVG(co)) as co,
+       	ROUND(AVG(o3)) as o3
+        FROM t_station_aqi
+        WHERE 1=1
+       	<if test="cityCode!=null and cityCode!=''">
+        AND city_code=#{cityCode}
+        </if>
+        <if test="standby2!=null and standby2!=''">
+        AND publish_date_time <![CDATA[ >= ]]> #{standby2}
+        </if>
+        <if test="standby3!=null and standby3!=''">
+        AND publish_date_time <![CDATA[ <= ]]> #{standby3}
+        </if>
+        GROUP BY station_name
+    </select>
+    
+    <!--统计分析 站点对比  -->
+    <select id="getStationRatio" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultMap="BaseResultMap">
+    SELECT
+        station_name,
+        station_code,
+        ROUND(AVG(aqi)) as aqi,
+        ROUND(AVG(pm2_5)) as pm2_5,
+        ROUND(AVG(pm10)) as pm10,
+        ROUND(AVG(so2)) as so2,
+        ROUND(AVG(no2)) as no2,
+        ROUND(AVG(co)) as co,
+        ROUND(AVG(o3)) as o3
+        FROM t_station_aqi
+        WHERE 1=1
+        <if test='standby1=="H" and standby5!=null'>
+        AND DATE_FORMAT(publish_date_time,'%Y%m')=DATE_FORMAT(#{standby5},'%Y%m') 
+        </if>
+        <if test='standby1=="LH" and standby5!=null'>
+        AND DATE_FORMAT(publish_date_time,'%Y%m')=DATE_FORMAT(DATE_ADD(#{standby5},INTERVAL -1 MONTH),'%Y%m')
+        </if>
+        <if test="stationName!=null and stationName!=''">
+        AND station_name = #{stationName}
+        </if>
+        <if test="stationCode!=null and stationCode!=''">
+        AND station_code = #{stationCode}
+        </if>
+        <if test="cityCode!=null and cityCode!=''">
+        AND city_code=#{cityCode}
+        </if>
+        GROUP BY station_name,station_code
+    </select>
+    
+    <!-- 获取站点信息，只需要名称和code -->
+    <select id="getStationInfo" parameterType="com.upsoft.environmentmonitoring.domain.po.StationAqi" resultType="com.upsoft.environmentmonitoring.domain.vo.StationVO">
+    SELECT  station_name as stationName,
+        	station_code as stationCode
+    FROM   t_station_aqi 
+    WHERE 1=1
+    <if test="cityCode!=null and cityCode!=''">
+    AND city_code=#{cityCode}
+    </if>
+	GROUP BY  station_name,station_code
+    </select>
+    
+    <!-- 最新一条数据的时间点 -->
+    <select id="getNewestTime" resultType="java.lang.String">
+    SELECT MAX(ptime)as ptime from (
+				SELECT SUBSTRING_INDEX(GROUP_CONCAT(publish_date_time ORDER BY publish_date_time desc),',',1)as ptime FROM
+				t_station_aqi GROUP BY station_code
+	)as c
+    </select>
+</mapper>

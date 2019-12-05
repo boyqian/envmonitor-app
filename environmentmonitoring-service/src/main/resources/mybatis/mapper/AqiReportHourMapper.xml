@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.AqiReportHourMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.AqiReportHour">
+        <id column="hour_aqi_id" property="hourAqiId"/>
+        <result column="monitor_date" property="monitorDate"/>
+        <result column="aqi_value" property="aqiValue"/>
+        <result column="aqi_level_code" property="aqiLevelCode"/>
+        <result column="aqi_level_name" property="aqiLevelName"/>
+        <result column="pm25_level_code" property="pm25LevelCode"/>
+        <result column="pm25_level_name" property="pm25LevelName"/>
+        <result column="pm10_level_code" property="pm10LevelCode"/>
+        <result column="pm10_level_name" property="pm10LevelName"/>
+        <result column="so2" property="so2"/>
+        <result column="so2_aqi" property="so2Aqi"/>
+        <result column="no2" property="no2"/>
+        <result column="no2_aqi" property="no2Aqi"/>
+        <result column="co" property="co"/>
+        <result column="co_aqi" property="coAqi"/>
+        <result column="pm10_1" property="pm10"/>
+        <result column="pm10_slide" property="pm10Slide"/>
+        <result column="PM10_slide_aqi" property="pm10SlideAqi"/>
+        <result column="pm25_1" property="pm25"/>
+        <result column="pm25_slide" property="pm25Slide"/>
+        <result column="PM25_slide_aqi" property="pm25SlideAqi"/>
+        <result column="o31h" property="o3"/>
+        <result column="o31h_aqi" property="o3Aqi"/>
+        <result column="create_time" property="createTime"/>
+        <result column="status" property="status"/>
+        <result column="version_time" property="versionTime"/>
+        <result column="point_id" property="pointId"/>
+        <result column="is_good" property="isGood"/>
+        <result column="wind_speed" property="windSpeed"/>
+        <result column="wind_direction" property="windDirection"/>
+        <result column="temperature" property="temperature"/>
+        <result column="humidity" property="humidity"/>
+        <result column="atmospheric_pressure" property="atmosphericPressure"/>
+        <result column="so2_standard" property="so2Standard"/>
+        <result column="no2_standard" property="no2Standard"/>
+        <result column="co_standard" property="coStandard"/>
+        <result column="pm10_standard" property="pm10Standard"/>
+        <result column="pm25_standard" property="pm25Standard"/>
+        <result column="o3_standard" property="o3Standard"/>
+        <result column="point_name" property="pointName"/>
+        <result column="xzsf" property="xzsf"/>
+        <result column="xzsf_code" property="xzsfCode"/>
+        <result column="xzsq" property="xzsq"/>
+        <result column="xzsq_code" property="xzsqCode"/>
+        <result column="xzx" property="xzx"/>
+        <result column="xzx_code" property="xzxCode"/>
+        <result column="xzjd" property="xzjd"/>
+        <result column="xzjd_code" property="xzjdCode"/>
+        <result column="xzc" property="xzc"/>
+        <result column="xzc_code" property="xzcCode"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="so2_max" property="so2Max"/>
+        <result column="no2_max" property="no2Max"/>
+        <result column="co_max" property="coMax"/>
+        <result column="pm10_min" property="pm10Min"/>
+        <result column="pm10_max" property="pm10Max"/>
+        <result column="pm25_min" property="pm25Min"/>
+        <result column="pm25_max" property="pm25Max"/>
+        <result column="o3_max" property="O3Max"/>
+        <result column="aqi_max" property="aqiMax"/>
+    </resultMap>
+
+	<!-- 根据城市Code查询当前城市的为站点数据分布 -->
+	<select id="getAqiReportByOperation" parameterType="com.upsoft.environmentmonitoring.domain.po.AqiReportHour" resultMap="BaseResultMap">
+	select a.*,b.* from (
+	select DISTINCT(point_name),longitude,latitude
+	from aqm_t_aqi_report_day
+	where longitude !=''
+	and latitude  !=''
+	)as a
+	left JOIN(
+	SELECT * FROM
+		aqm_t_aqi_report_hour t 
+		WHERE t.monitor_date > (SELECT DATE_SUB(MAX(t.monitor_date),INTERVAL 10 MINUTE) FROM aqm_t_aqi_report_hour t)
+		<if test="standby2!=null and standby2!=''">
+		AND DATE_FORMAT(monitor_date,'%Y%m%d%H')=DATE_FORMAT(#{standby2},'%Y%m%d%H')
+		</if>
+	 	<if test='standby1=="D"'>
+ 		AND t.monitor_date>=DATE_SUB(NOW(), INTERVAL 24 HOUR) 
+ 		</if>
+	)as b
+	on a.point_name=b.point_name
+	</select>
+    
+    <!-- 根据微站点id查询时间范围内的各个因子折线图 -->
+    <select id="getSingleAqiReportThrend" parameterType="com.upsoft.environmentmonitoring.domain.po.AqiReportHour" resultMap="BaseResultMap">
+    SELECT * FROM
+    aqm_t_aqi_report_hour t
+    WHERE 1=1
+ 	<if test="standby1!=null and standby1!=''">
+ 	and point_id=#{standby1}
+ 	</if>
+ 	<if test="standby2!=null and standby2!=''">
+    and t.monitor_date <![CDATA[ >= ]]> #{standby2}
+    </if>
+    <if test="standby3!=null and standby3!=''">
+    and t.monitor_date <![CDATA[ <= ]]> #{standby3}
+    </if>
+    </select>
+    
+    <!-- 获取微站点的统计分析数据 -->
+    <select id="getAqiReportHourReport" parameterType="com.upsoft.environmentmonitoring.domain.po.AqiReportHour" resultMap="BaseResultMap">
+    SELECT * FROM
+    aqm_t_aqi_report_hour t
+    WHERE 1=1
+ 	<if test="standby2!=null and standby2!=''">
+    and t.monitor_date <![CDATA[ >= ]]> #{standby2}
+    </if>
+    <if test="standby3!=null and standby3!=''">
+    and t.monitor_date <![CDATA[ <= ]]> #{standby3}
+    </if>
+    </select>
+    
+    <!-- 统计分析 站点对比 -->
+    <select id="getAqiReportHourRatio" parameterType="com.upsoft.environmentmonitoring.domain.po.AqiReportHour" resultMap="BaseResultMap">
+    SELECT 
+    point_id,
+    point_name,
+    ROUND(AVG(aqi_value)) as aqi_value,
+    ROUND(AVG(so2)) as so2,
+    ROUND(AVG(co)) as co,
+    ROUND(AVG(no2)) as no2,
+    ROUND(AVG(o38h)) as o31h,
+    ROUND(AVG(pm25)) as pm25_1,
+    ROUND(AVG(pm10)) as pm10_1
+    FROM
+    aqm_t_aqi_report_day
+    WHERE 1=1
+    <if test='standby2=="H" and standby3!=null'>
+    AND DATE_FORMAT(monitor_date,'%Y%m')=DATE_FORMAT(#{standby3},'%Y%m') 
+    </if>
+    <if test='standby2=="LH" and standby3!=null'>
+    AND DATE_FORMAT(monitor_date,'%Y%m')=DATE_FORMAT(DATE_ADD(#{standby3},INTERVAL -1 MONTH),'%Y%m')
+    </if>
+    <if test="pointId!=null and pointId!=''">
+    AND point_id=#{pointId}
+    </if>
+     <if test="pointName!=null and pointName!=''">
+    AND point_name=#{pointName}
+    </if>
+    GROUP BY point_id,point_name
+    </select>
+    
+    <!-- 获取微站点的站点名称和code -->
+    <select id="getStationInfo" parameterType="com.upsoft.environmentmonitoring.domain.po.AqiReportHour" resultType="com.upsoft.environmentmonitoring.domain.vo.StationVO">
+    SELECT point_id as stationCode,
+    point_name as stationName
+    FROM aqm_t_aqi_report_day
+    GROUP BY point_id,point_name
+    </select>
+    
+        <!-- 最新一条数据的时间点 -->
+    <select id="getNewestTime" resultType="java.lang.String">
+     SELECT MAX(ptime)as ptime from (
+				SELECT SUBSTRING_INDEX(GROUP_CONCAT(monitor_date ORDER BY monitor_date desc),',',1)as ptime FROM
+				aqm_t_aqi_report_hour GROUP BY point_name
+	)as c
+    </select>
+</mapper>

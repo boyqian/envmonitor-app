@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.User">
+        <id column="USER_ID" property="userId"/>
+        <result column="USER_NAME" property="userName"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="NAME" property="name"/>
+        <result column="ENABLE" property="enable"/>
+        <result column="CREATOR_ID" property="creatorId"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="UPDATE_TIME" property="updateTime"/>
+        <result column="AGE" property="age"/>
+        <result column="TEL" property="tel"/>
+        <result column="SEX" property="sex"/>
+        <result column="EMAIL" property="email"/>
+        <result column="SOURCE_USER_ID" property="sourceUserId"/>
+        <result column="SOURCE_PLAT" property="sourcePlat"/>
+        <result column="USER_TYPE" property="userType"/>
+        <result column="IS_INNER" property="isInner"/>
+        <result column="INNER_ROLE_ID" property="innerRoleId"/>
+        <result column="UPDATER_ID" property="updaterId"/>
+        <result column="VERSION_TIME" property="versionTime"/>
+        <result column="DEL_FLAG" property="delFlag"/>
+        <result column="EXT_INFO" property="extInfo"/>
+        <result column="BIZ_RULE" property="bizRule"/>
+        <result column="DIVISION_CODE" property="divisionCode"/>
+        <result column="DIVISION_NAME" property="divisionName"/>
+    </resultMap>
+
+    <!-- 查找User -->
+    <select id="getUser" parameterType="com.upsoft.environmentmonitoring.domain.po.User" resultMap="BaseResultMap">
+        SELECT
+        USER_ID,
+        USER_NAME,
+        PASSWORD,
+        NAME,
+        ENABLE,
+        CREATOR_ID,
+        CREATE_TIME,
+        UPDATE_TIME,
+        AGE,
+        TEL,
+        SEX,
+        EMAIL,
+        SOURCE_USER_ID,
+        SOURCE_PLAT,
+        USER_TYPE,
+        IS_INNER,
+        INNER_ROLE_ID,
+        UPDATER_ID,
+        VERSION_TIME,
+        DEL_FLAG,
+        EXT_INFO,
+        BIZ_RULE,
+        DIVISION_CODE,
+        DIVISION_NAME
+        FROM usermgt_user
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="userId != null and userId != ''">
+                    USER_ID = #{userId}
+                </if>
+                <if test="userName != null and userName != ''">
+                    AND USER_NAME = #{userName}
+                </if>
+                <if test="password!=null and password!=''">
+                	AND password = #{password}
+                </if>
+                    AND ENABLE = 1
+            </trim>
+        </where>
+    </select>
+
+    <!-- 修改User -->
+    <update id="updateUser" parameterType="com.upsoft.environmentmonitoring.domain.po.User">
+        UPDATE usermgt_user
+        <set>
+            <trim suffixOverrides=",">
+                <if test="password != null">
+                    PASSWORD = #{password}
+                </if>
+            </trim>
+        </set>
+        <where>
+            <trim suffixOverrides="AND|OR">
+            <if test="userId != null and userId != ''">
+                USER_ID = #{userId}
+            </if>
+            <if test="userName != null and userName != ''">
+                OR USER_NAME = #{userName}
+            </if>
+            </trim>
+        </where>
+    </update>
+
+</mapper>

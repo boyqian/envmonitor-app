@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.FavoriteDeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.FavoriteDevice">
+        <id column="favorite_device_id" property="favoriteDeviceId"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="channel_id" property="channelId"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="device_ip" property="deviceIp"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="userName"/>
+        <result column="creator" property="creator"/>
+        <result column="editor" property="editor"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="standby1" property="standby1"/>
+        <result column="standby2" property="standby2"/>
+        <result column="standby3" property="standby3"/>
+        <result column="standby4" property="standby4"/>
+        <result column="standby5" property="standby5"/>
+    </resultMap>
+
+	<!--新增视频收藏  -->
+	<insert id="insertFavoriteDevice" parameterType="com.upsoft.environmentmonitoring.domain.po.FavoriteDevice">
+	INSERT INTO t_favorite_device(
+		favorite_device_id,
+		device_id,
+		channel_id,
+		device_name,
+		device_ip,
+		user_id,
+		username,
+		creator,
+		editor,
+		is_deleted,
+		create_time,
+		update_time,
+		standby1,
+		standby2,
+		standby3,
+		standby4,
+		standby5
+	) VALUES(
+		#{favoriteDeviceId},
+		#{deviceId},
+		#{channelId},
+		#{deviceName},
+		#{deviceIp},
+		#{userId},
+		#{userName},
+		#{creator},
+		#{editor},
+		#{isDeleted},
+		#{createTime},
+		#{updateTime},
+		#{standby1},
+		#{standby2},
+		#{standby3},
+		#{standby4},
+		#{standby5}
+	)
+	</insert>
+	
+	<!--更新视频收藏  -->
+	<update id="updateFavoriteDevice" parameterType="com.upsoft.environmentmonitoring.domain.po.FavoriteDevice">
+	UPDATE t_favorite_device
+	<set>
+		<trim suffixOverrides=",">
+			<if test="deviceId!=null">
+				device_id=#{deviceId},
+			</if>
+			<if test="channelId!=null">
+				channel_id=#{channelId},
+			</if>
+			<if test="deviceName!=null">
+				device_name=#{deviceName},
+			</if>
+			<if test="deviceIp!=null">
+				device_ip=#{deviceIp},
+			</if>
+			<if test="userId!=null">
+				user_id=#{userId},
+			</if>
+			<if test="userName!=null">
+				username=#{userName},
+			</if>
+			<if test="creator!=null">
+				creator=#{creator},
+			</if>
+			<if test="editor!=null">
+				editor=#{editor},
+			</if>
+			<if test="isDeleted!=null">
+				is_deleted=#{isDeleted},
+			</if>
+			<if test="createTime!=null">
+				create_time=#{createTime},
+			</if>
+			<if test="updateTime!=null">
+				update_time=#{updateTime},
+			</if>
+			<if test="standby1">
+				standby1=#{standby1},
+			</if>
+			<if test="standby2">
+				standby2=#{standby2},
+			</if>
+			<if test="standby3">
+				standby3=#{standby3},
+			</if>
+			<if test="standby4">
+				standby4=#{standby4},
+			</if>
+			<if test="standby5">
+				standby5=#{standby5},
+			</if>
+		</trim>
+	</set>
+	<where>
+		<trim suffixOverrides="AND|OR">
+			<if test="userId!=null and userId!=''">
+				AND user_id=#{userId}
+			</if>
+			<if test="userName!=null and userName!=''">
+				AND username=#{userName}
+			</if>
+			<if test="deviceId!=null and deviceId!=''">
+				AND device_id=#{deviceId}
+			</if>
+		</trim>
+	</where>
+	</update>
+	
+	<!--获取视频收藏列表 -->
+	<select id="getFavoriteDevice" parameterType="com.upsoft.environmentmonitoring.domain.po.FavoriteDevice" resultType="com.upsoft.environmentmonitoring.domain.po.FavoriteDevice">
+	SELECT favorite_device_id,
+	device_id,
+	channel_id,
+	device_name,
+	device_ip,
+	user_id,
+	username,
+	creator,
+	editor,
+	is_deleted,
+	create_time,
+	update_time,
+	standby1,
+	standby2,
+	standby3,
+	standby4,
+	standby5
+	FROM t_favorite_device
+	WHERE is_deleted=0
+	<if test="userId!=null and userId!=''">
+	AND user_id=#{userId}
+	</if>
+	<if test="userName!=null and userName!=''">
+	AND username=#{userName}
+	</if>
+	<if test="deviceId!=null and deviceId!=''">
+	AND device_id=#{deviceId}
+	</if>
+	</select>
+</mapper>

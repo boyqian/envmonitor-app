@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.ProblemMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.Problem">
+        <result column="problem_id" property="problemId"/>
+        <result column="point_id" property="pointId"/>
+        <result column="monitor_type_code" property="monitorTypeCode"/>
+        <result column="monitor_type_name" property="monitorTypeName"/>
+        <result column="point_name" property="pointName"/>
+        <result column="poll_factor" property="pollFactor"/>
+        <result column="problem_level_code" property="problemLevelCode"/>
+        <result column="problem_level_name" property="problemLevelName"/>
+        <result column="problem_detail" property="problemDetail"/>
+        <result column="problem_type_code" property="problemTypeCode"/>
+        <result column="problem_type_name" property="problemTypeName"/>
+        <result column="problem_status_code" property="problemStatusCode"/>
+        <result column="problem_status_name" property="problemStatusName"/>
+        <result column="xzsf" property="xzsf"/>
+        <result column="xzsf_code" property="xzsfCode"/>
+        <result column="xzsq" property="xzsq"/>
+        <result column="xzsq_code" property="xzsqCode"/>
+        <result column="xzx" property="xzx"/>
+        <result column="xzx_code" property="xzxCode"/>
+        <result column="xzjd" property="xzjd"/>
+        <result column="xzjd_code" property="xzjdCode"/>
+        <result column="xzc" property="xzc"/>
+        <result column="xzc_code" property="xzcCode"/>
+        <result column="address" property="address"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="status" property="status"/>
+        <result column="version_time" property="versionTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="problem_code" property="problemCode"/>
+        <result column="event_time" property="eventTime"/>
+    </resultMap>
+
+    <!-- 查找Problem -->
+    <select id="getProblem" parameterType="com.upsoft.environmentmonitoring.domain.po.Problem" resultMap="BaseResultMap">
+        SELECT
+        problem_id,
+        point_id,
+        monitor_type_code,
+        monitor_type_name,
+        point_name,
+        poll_factor,
+        problem_level_code,
+        problem_level_name,
+        problem_detail,
+        problem_type_code,
+        problem_type_name,
+        problem_status_code,
+        problem_status_name,
+        xzsf,
+        xzsf_code,
+        xzsq,
+        xzsq_code,
+        xzx,
+        xzx_code,
+        xzjd,
+        xzjd_code,
+        xzc,
+        xzc_code,
+        address,
+        longitude,
+        latitude,
+        status,
+        version_time,
+        create_time,
+        problem_code,
+        event_time
+        FROM aqm_t_problem
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="problemId != null and problemId != ''">
+                    problem_id = #{problemId}
+                </if>
+            </trim>
+        </where>
+    </select>
+
+    <!-- 获取首页预警问题列表，限3条 -->
+	<select id="getProblemList" parameterType="com.upsoft.environmentmonitoring.domain.po.Problem" resultMap="BaseResultMap">
+		select 
+		problem_id,
+        point_id,
+        monitor_type_code,
+        monitor_type_name,
+        point_name,
+        poll_factor,
+        problem_level_code,
+        problem_level_name,
+        problem_detail,
+        problem_type_code,
+        problem_type_name,
+        problem_status_code,
+        problem_status_name,
+        xzsf,
+        xzsf_code,
+        xzsq,
+        xzsq_code,
+        xzx,
+        xzx_code,
+        xzjd,
+        xzjd_code,
+        xzc,
+        xzc_code,
+        address,
+        longitude,
+        latitude,
+        status,
+        version_time,
+        create_time,
+        problem_code,
+        event_time
+        from aqm_t_problem
+        where status=1
+		order by event_time desc
+		<if test="limit!=null and offset !=null">
+		limit #{limit} , #{offset}
+		</if>
+		<if test='status=="1"'>
+		limit 3
+		</if>
+	</select>
+</mapper>

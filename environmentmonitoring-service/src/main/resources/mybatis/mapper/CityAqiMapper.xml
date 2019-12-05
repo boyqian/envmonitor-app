@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.CityAqiMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.CityAqi">
+        <id column="city_aqi_id" property="cityAqiId"/>
+        <result column="city_name" property="cityName"/>
+        <result column="city_code" property="cityCode"/>
+        <result column="city_longitude" property="cityLongitude"/>
+        <result column="city_latitude" property="cityLatitude"/>
+        <result column="publish_date_time" property="publishDateTime"/>
+        <result column="city_aqi_type" property="cityAqiType"/>
+        <result column="aqi" property="aqi"/>
+        <result column="aqi_level" property="aqiLevel"/>
+        <result column="primary_pollutant" property="primaryPollutant"/>
+        <result column="pm2_5" property="pm25"/>
+        <result column="pm10" property="pm10"/>
+        <result column="so2" property="so2"/>
+        <result column="no2" property="no2"/>
+        <result column="co" property="co"/>
+        <result column="o3" property="o3"/>
+        <result column="iaqi_pm2_5" property="iaqiPm25"/>
+        <result column="iaqi_pm10" property="iaqiPm10"/>
+        <result column="iaqi_so2" property="iaqiSo2"/>
+        <result column="iaqi_no2" property="iaqiNo2"/>
+        <result column="iaqi_co" property="iaqiCo"/>
+        <result column="iaqi_o3" property="iaqiO3"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="editor" property="editor"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="standby1" property="standby1"/>
+        <result column="standby2" property="standby2"/>
+        <result column="standby3" property="standby3"/>
+        <result column="standby4" property="standby4"/>
+        <result column="standby5" property="standby5"/>
+    </resultMap>
+
+    <!-- 批量新增CityAqi -->
+    <insert id="insertCityAqiBatch" parameterType="java.util.List">
+        INSERT INTO t_city_aqi (
+        city_aqi_id,
+        city_name,
+        city_code,
+        city_longitude,
+        city_latitude,
+        publish_date_time,
+        city_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        create_time,
+        is_deleted
+        )
+        VALUES
+        <foreach collection="cityAqiList" item="cityAqi" index="index" separator=",">
+            (#{cityAqi.cityAqiId},
+            #{cityAqi.cityName},
+            #{cityAqi.cityCode},
+            #{cityAqi.cityLongitude},
+            #{cityAqi.cityLatitude},
+            #{cityAqi.publishDateTime},
+            #{cityAqi.cityAqiType},
+            #{cityAqi.aqi},
+            #{cityAqi.aqiLevel},
+            #{cityAqi.primaryPollutant},
+            #{cityAqi.pm25},
+            #{cityAqi.pm10},
+            #{cityAqi.so2},
+            #{cityAqi.no2},
+            #{cityAqi.co},
+            #{cityAqi.o3},
+            #{cityAqi.iaqiPm25},
+            #{cityAqi.iaqiPm10},
+            #{cityAqi.iaqiSo2},
+            #{cityAqi.iaqiNo2},
+            #{cityAqi.iaqiCo},
+            #{cityAqi.iaqiO3},
+            #{cityAqi.createTime},
+            #{cityAqi.isDeleted})
+        </foreach>
+    </insert>
+
+
+    <!-- 查找四川省城市AQI数据最后更新时间 -->
+    <select id="getLatestTimeForCityAqi" parameterType="java.lang.String" resultType="java.time.LocalDateTime">
+        SELECT publish_date_time
+        FROM t_city_aqi
+        <where>
+            left(city_code, 2) = '51' AND city_aqi_type = #{cityAqiType}
+        </where>
+        ORDER BY publish_date_time DESC
+        LIMIT 0, 1
+    </select>
+
+    <!-- 物理删除CityAqi -->
+    <!--
+    <delete id="deleteCityAqi" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi">
+        DELETE FROM t_city_aqi
+        <where>
+            <trim suffixOverrides="AND|OR">
+                <if test="cityAqiId != null and cityAqiId != ''">
+                    city_aqi_id = #{cityAqiId}
+                </if>
+            </trim>
+        </where>
+    </delete>
+    -->
+    
+    <!-- 获取首页达标天数 -->
+    <select id="getTargetDays" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi" resultType="com.upsoft.environmentmonitoring.domain.po.TargetDays">
+    select count(1) as dDays from t_city_aqi
+	where 
+	city_aqi_type="D"
+	and DATE_FORMAT(publish_date_time,"%Y")=DATE_FORMAT(NOW(),'%Y')
+	and (aqi_level="1" or aqi_level="2")
+    <if test="cityCode != null">
+       and city_code = #{cityCode}
+    </if>
+    </select>
+    
+    <!-- 获取首页近24小时或者近30天的各个因子的数据,默认为24小时 -->
+    <select id="getCityAqiByOperation" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi" resultMap="BaseResultMap">
+    SELECT
+        city_aqi_id,
+        city_name,
+        city_code,
+        city_longitude,
+        city_latitude,
+        publish_date_time,
+        city_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        is_deleted,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_city_aqi
+        WHERE 1=1
+        <if test='cityAqiType=="H"'>
+        and city_aqi_type="H"
+        and publish_date_time>=DATE_SUB(NOW(), INTERVAL 1 DAY)
+        </if>
+        <if test='cityAqiType=="D"'>
+        and city_aqi_type="D"
+        and publish_date_time>=DATE_SUB(NOW(), INTERVAL 30 DAY)
+        </if>
+        <if test="cityAqiType==null or cityAqiType==''">
+        and city_aqi_type="H"
+        and publish_date_time>=DATE_SUB(NOW(), INTERVAL 1 DAY)
+        </if>
+        <if test="cityCode!=null and cityCode!=''">
+        and city_code=#{cityCode}
+        </if>
+    </select>
+    
+    <!-- 获取首页本年或本月的优良天数数据,默认为半年 -->
+    <select id="getGoodDaysByOperation" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi" resultType="com.upsoft.environmentmonitoring.domain.vo.GoodDays">
+    SELECT 
+	count(aqi_level=1 or null) as excellent,
+	count(aqi_level=2 or null) as good,
+	count(aqi_level=3 or null) as light,
+	count(aqi_level=4 or null) as moderate,
+	count(aqi_level=5 or null) as severe,
+	count(aqi_level=6 or null) as serious
+	from t_city_aqi
+	where city_aqi_type="D"
+	<if test='cityAqiType=="H"'>
+    and DATE_FORMAT(publish_date_time,'%Y%m')=DATE_FORMAT(NOW(),'%Y%m')
+    </if>
+    <if test='cityAqiType=="D"'>
+     and DATE_FORMAT(publish_date_time,'%Y')=DATE_FORMAT(NOW(),'%Y')
+    </if>
+    <if test='cityAqiType=="LH"'>
+    and DATE_FORMAT(publish_date_time,'%Y%m')=DATE_FORMAT(DATE_ADD(NOW(),INTERVAL -1 MONTH),'%Y%m')
+    </if>
+    <if test='cityAqiType=="LD"'>
+     and DATE_FORMAT(publish_date_time,'%Y')=DATE_FORMAT(DATE_ADD(NOW(),INTERVAL -1 YEAR),'%Y')
+    </if>
+    <if test="cityAqiType==null or cityAqiType==''">
+     and DATE_FORMAT(publish_date_time,'%Y')=DATE_FORMAT(NOW(),'%Y')
+    </if>
+	<if test="cityCode!=null and cityCode!=''">
+    and city_code=#{cityCode}
+    </if>
+    </select>
+    
+    <!--首页-今日最近的AQI数据及主要污染物  -->
+    <select id="getPrimaryPollutant" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi" resultType="com.upsoft.environmentmonitoring.domain.vo.PrimaryPollutant">
+    SELECT
+        aqi,
+        (case aqi_level
+        when 1 then "优"
+        when 2 then "良"
+        when 3 then "轻度污染"
+        when 4 then "中度污染"
+        when 5 then "重度污染"
+        when 6 then "严重污染"
+        else ''
+		end
+        )as aqiLevel,
+        primary_pollutant as primaryPollutant,
+        publish_date_time as publishDateTime
+    FROM t_city_aqi
+	WHERE city_aqi_type="H"
+	<if test="cityCode!=null and cityCode!=''">
+	AND city_code=#{cityCode}
+	</if>
+	ORDER BY publishDateTime desc
+	limit 1
+    </select>
+    
+    <!--统计分析-根据城市code和选择年月获取Aqi日历 -->
+    <select id="getAqiCalendar" parameterType="com.upsoft.environmentmonitoring.domain.po.CityAqi" resultMap="BaseResultMap">
+     SELECT
+        city_aqi_id,
+        city_name,
+        city_code,
+        city_longitude,
+        city_latitude,
+        publish_date_time,
+        city_aqi_type,
+        aqi,
+        aqi_level,
+        primary_pollutant,
+        pm2_5,
+        pm10,
+        so2,
+        no2,
+        co,
+        o3,
+        iaqi_pm2_5,
+        iaqi_pm10,
+        iaqi_so2,
+        iaqi_no2,
+        iaqi_co,
+        iaqi_o3,
+        creator,
+        create_time,
+        editor,
+        update_time,
+        is_deleted,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        FROM t_city_aqi
+        WHERE city_aqi_type="D"
+        <if test="cityCode!=null and cityCode!=''">
+        and city_code=#{cityCode}
+        </if>
+        <if test="standby1!=null and standby1!=''">
+        and DATE_FORMAT(publish_date_time,'%Y%m')=DATE_FORMAT(#{standby1},'%Y%m') 
+        </if>
+    </select>
+</mapper>

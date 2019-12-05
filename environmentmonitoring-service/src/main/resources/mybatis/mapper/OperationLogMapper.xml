@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.upsoft.environmentmonitoring.dao.OperationLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.upsoft.environmentmonitoring.domain.po.OperationLog">
+        <id column="operation_log_id" property="operationLogId"/>
+        <result column="operation_title" property="operationTitle"/>
+        <result column="operation_type" property="operationType"/>
+        <result column="operation_uri" property="operationUri"/>
+        <result column="operation_request_ip" property="operationRequestIp"/>
+        <result column="operation_table_name" property="operationTableName"/>
+        <result column="operation_content" property="operationContent"/>
+        <result column="operation_user_id" property="operationUserId"/>
+        <result column="operation_user_name" property="operationUserName"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="standby1" property="standby1"/>
+        <result column="standby2" property="standby2"/>
+        <result column="standby3" property="standby3"/>
+        <result column="standby4" property="standby4"/>
+        <result column="standby5" property="standby5"/>
+    </resultMap>
+
+    <!-- 新增OperationLog -->
+    <insert id="insertOperationLog" parameterType="com.upsoft.environmentmonitoring.domain.po.OperationLog">
+        INSERT INTO t_operation_log (
+        operation_log_id,
+        operation_title,
+        operation_type,
+        operation_uri,
+        operation_request_ip,
+        operation_table_name,
+        operation_content,
+        operation_user_id,
+        operation_user_name,
+        is_deleted,
+        create_time,
+        update_time,
+        standby1,
+        standby2,
+        standby3,
+        standby4,
+        standby5
+        )
+        VALUES (
+        #{operationLogId},
+        #{operationTitle},
+        #{operationType},
+        #{operationUri},
+        #{operationRequestIp},
+        #{operationTableName},
+        #{operationContent},
+        #{operationUserId},
+        #{operationUserName},
+        #{isDeleted},
+        #{createTime},
+        #{updateTime},
+        #{standby1},
+        #{standby2},
+        #{standby3},
+        #{standby4},
+        #{standby5}
+        )
+    </insert>
+
+</mapper>
